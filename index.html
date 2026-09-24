@@ -215,6 +215,7 @@ footer{border-top:1px solid var(--lb-line);padding:48px 24px 40px;font-size:.78r
 footer .top{display:flex;justify-content:space-between;gap:24px;flex-wrap:wrap;max-width:1080px;margin:0 auto 26px}
 footer .disclaimer{max-width:1080px;margin:0 auto;line-height:1.7}
 footer a{color:var(--lb-muted);text-decoration:none;margin-left:18px}
+#map .leaflet-tile-pane{filter:grayscale(1) sepia(.18) brightness(1.06) contrast(.88)}
 </style>
 </head>
 <body>
@@ -909,7 +910,7 @@ function initMap(){
   if(typeof L==='undefined'){document.getElementById('map').style.display='none';renderListings();return}
   if(map){map.invalidateSize();return}
   map=L.map('map',{scrollWheelZoom:false}).setView([35.4,-119.9],6);
-  L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png',{attribution:'© OpenStreetMap © CARTO'}).addTo(map);
+  L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19,attribution:'© OpenStreetMap contributors'}).addTo(map);
   renderListings();
 }
 function renderListings(){
