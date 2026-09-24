@@ -124,7 +124,24 @@ export default {
     }
 
     // --- Static assets (configure [assets] in wrangler.toml) ---
-    if (env.ASSETS) return env.ASSETS.fetch(request);
+    if (env.ASSETS) {
+      const res = await env.ASSETS.fetch(request);
+      const ct = res.headers.get('content-type') || '';
+      if (!ct.includes('text/html')) return res;
+      // Map tiles: CARTO now requires an API key → serve free OpenStreetMap tiles with a light, warm filter.
+      // No-op once index.html itself already contains the fix.
+      let html = await res.text();
+      html = html.replace(
+        "L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png',{attribution:'© OpenStreetMap © CARTO'})",
+        "L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19,attribution:'© OpenStreetMap contributors'})"
+      );
+      if (!html.includes('leaflet-tile-pane{filter')) {
+        html = html.replace('</style>', '#map .leaflet-tile-pane{filter:grayscale(1) sepia(.18) brightness(1.06) contrast(.88)}\n</style>');
+      }
+      const headers = new Headers(res.headers);
+      headers.delete('content-length');
+      return new Response(html, { status: res.status, headers });
+    }
     return new Response('Not found', { status: 404 });
   },
 };
